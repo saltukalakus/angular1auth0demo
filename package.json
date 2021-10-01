@@ -1,0 +1,22 @@
+{
+  "name": "centralized-login",
+  "version": "0.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "npm-check"
+  },
+  "author": "Saltuk Alakus",
+  "license": "MIT",
+  "dependencies": {
+    "@uirouter/angularjs": "^1.0.5",
+    "angular": "^1.6.1",
+    "angular-auth0-spa-js": "^4.0.7",
+    "@auth0/auth0-spa-js": "^1.17.0",
+    "bootstrap": "^3.4.1",
+    "express": "^4.14.0"
+  },
+  "devDependencies": {
+    "npm-check": "^5.5.2"
+  }
+}

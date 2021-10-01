@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app" ng-controller = 'appCtrl'>
+<head>
+  <base href="/">
+  <meta charset="utf-8">
+      <div>
+        <div ng-if="isAuthenticated()">Authenticated!</div>
+      </div>
+    </section>
+  </div>
+
+<!-- auth0 -->
+
+<script type="text/javascript" src="node_modules/angular/angular.js"></script>
+<script type="text/javascript" src="node_modules/@uirouter/angularjs/release/angular-ui-router.js"></script>
+<script type="text/javascript" src="node_modules/@auth0/auth0-spa-js/dist/auth0-spa-js.production.js"></script>
+<script type="text/javascript" src="node_modules/angular-auth0-spa-js/dist/angular-auth0-spa-js.js"></script>
+<script type="text/javascript" src="controller.js"></script>
+
+</body>
+</html>
