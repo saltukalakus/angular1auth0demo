@@ -31,6 +31,39 @@ authService.$inject = ['$state', 'angularAuth0', '$timeout'];
 function authService($state, angularAuth0, $timeout) {
     var expiresAt;
 
+    function createCookie(name, value, date) {
+      var expires;
+      if (date) {
+          expires = "; expires=" + date.toGMTString();
+      }
+      else {
+          expires = "";
+      }
+      document.cookie = name + "=" + value + expires + "; path=/";
+    }
+  
+    function setCookie(cname, cvalue, date) {
+      let expires = "expires="+ date.toUTCString();
+      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+
+    function getCookie(cname) {
+      let name = cname + "=";
+      let decodedCookie = decodeURIComponent(document.cookie);
+      let ca = decodedCookie.split(';');
+      for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+
+
     function login() {
       angularAuth0.loginWithRedirect();
     }
@@ -51,7 +84,9 @@ function authService($state, angularAuth0, $timeout) {
     }
 
     function handleAuthentication() {
+      console.log("handleAuthentication registered..");
       angularAuth0.handleRedirectCallback().then(redirectResult => {
+        console.log("handleAuthentication called..");
         angularAuth0.getIdTokenClaims().then(id_token => {
           expiresAt = new Date(id_token.exp * 1000);
           console.log(expiresAt);
@@ -63,9 +98,9 @@ function authService($state, angularAuth0, $timeout) {
               result => {
                 console.log("isAuthenticated: " + result);
                 if (result) {
-                  localStorage.setItem('isLoggedIn', 'true');
+                  setCookie("app.is.authenticated", "true", expiresAt);
                 } else {
-                  localStorage.setItem('isLoggedIn', 'false');
+                  setCookie("app.is.authenticated", "false");
                 }
                 $state.go('home');
               }
@@ -93,22 +128,11 @@ function authService($state, angularAuth0, $timeout) {
     // }
 
     function isAuthenticated() {
-      console.log("is it authenticated..?");
-      let cookie = false
-      let name = "auth0.is.authenticated=true"
-      let decodedCookie = decodeURIComponent(document.cookie);
-      let ca = decodedCookie.split(';');
-      for(let i = 0; i <ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) == ' ') {
-          c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-          cookie = true
-        }
+      if ( getCookie("app.is.authenticated") === "true") {
+        return true;
+      } else {
+        return false;
       }
-
-      return cookie
     }
 
     return {
@@ -119,7 +143,22 @@ function authService($state, angularAuth0, $timeout) {
     }
 };
 
-var appController = angular.module('app', ['auth']);
+var appController = angular.module('app', ['auth', 'ui.router'])
+.config(config);
+
+config.$inject = [
+'$stateProvider'
+];
+
+function config(
+$stateProvider
+) {
+
+$stateProvider
+  .state('home', {
+    url: '/',
+  });
+}
 
 appController.controller('appCtrl', function ($scope, authService) {
   var vm = this;
@@ -129,50 +168,17 @@ appController.controller('appCtrl', function ($scope, authService) {
   // for ng-if in index.ejs
   $scope.isAuthenticated = function() {
     if (authService.isAuthenticated()) {
-      return true
+      return true;
     } else {
-      return false
+      return false;
     }
   }
 
-  // timeout error is happening after the cookie is added but before the token is added to local storage
-  // if we can find a way to stop the timeout error after it happens the first time, this will have to be rewritten to check for the token too
-  function cookieCheckTimeout() {
-    setTimeout(() => {
-      if (authService.isAuthenticated()) {
-        location.reload()
-        checkCount = 0
-        return
-      } else {
-        checkCount++
-      }
-
-      while (checkCount < 16) {
-        console.log(checkCount)
-        cookieCheckTimeout()
-        return
-      }
-
-      if (checkCount > 15) {
-        alert = $mdDialog.alert()
-          .title('Login Error')
-          .textContent('If you are experiencing issues logging in, make sure pop up windows are allowed in your browser and reload the page.')
-          .ok('Close')
-
-        $mdDialog
-          .show(alert)
-
-        return
-      }
-    }, 3000)
-  }
-
-  async function loginAndRefresh() {
-    await authService.login()
-    cookieCheckTimeout()
-  }
-
   if (!authService.isAuthenticated()) {
-      loginAndRefresh()
+    if (window.location.pathname === "/callback") {
+      authService.handleAuthentication();
+    } else {
+      authService.login();
+    }
   }
 })
