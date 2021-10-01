@@ -161,10 +161,6 @@ $stateProvider
 }
 
 appController.controller('appCtrl', function ($scope, authService) {
-  var vm = this;
-  vm.auth = authService;
-  let checkCount = 0
-
   // for ng-if in index.ejs
   $scope.isAuthenticated = function() {
     if (authService.isAuthenticated()) {
