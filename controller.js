@@ -30,17 +30,6 @@ authService.$inject = ['$state', 'angularAuth0', '$timeout'];
 
 function authService($state, angularAuth0, $timeout) {
     var expiresAt;
-
-    function createCookie(name, value, date) {
-      var expires;
-      if (date) {
-          expires = "; expires=" + date.toGMTString();
-      }
-      else {
-          expires = "";
-      }
-      document.cookie = name + "=" + value + expires + "; path=/";
-    }
   
     function setCookie(cname, cvalue, date) {
       let expires = "expires="+ date.toUTCString();
